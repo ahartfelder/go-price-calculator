@@ -1,3 +1,3 @@
-module practice-project
+module example.com/price-calculator
 
 go 1.23.0

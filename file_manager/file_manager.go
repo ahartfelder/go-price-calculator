@@ -5,14 +5,22 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"time"
 )
 
-func ReadLines(path string) ([]string, error) {
-	file, err := os.Open(path)
+type FileManager struct {
+	InputFilePath  string
+	OutputFilePath string
+}
+
+func (fm FileManager) ReadLines() ([]string, error) {
+	file, err := os.Open(fm.InputFilePath)
 
 	if err != nil {
 		return []string{}, errors.New("unable to open file")
 	}
+
+	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 	var lines []string
@@ -24,29 +32,36 @@ func ReadLines(path string) ([]string, error) {
 	err = scanner.Err()
 
 	if err != nil {
-		file.Close()
 		return []string{}, errors.New("unable to read file")
 	}
 
-	file.Close()
 	return lines, nil
 }
 
-func WriteJSON(path string, data any) error {
-	file, err := os.Create(path)
+func (fm FileManager) WriteResult(data any) error {
+	file, err := os.Create(fm.OutputFilePath)
 
 	if err != nil {
 		return errors.New("unable to create file")
 	}
 
+	defer file.Close()
+
+	time.Sleep(3 * time.Second)
+
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(data)
 
 	if err != nil {
-		file.Close()
 		return errors.New("unable to convert data to JSON")
 	}
 
-	file.Close()
 	return nil
+}
+
+func New(inputPath, outputPath string) FileManager {
+	return FileManager{
+		inputPath,
+		outputPath,
+	}
 }
